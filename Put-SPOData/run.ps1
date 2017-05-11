@@ -13,7 +13,7 @@ write-output "Setting Encryption Key Data..."
 $keypath = "D:\home\site\wwwroot\Put-SPOData\PassEncryptKey.key"
 
 write-output "Converting App Setting encrypted PW to PSCredential..."
-$secpassword = $(ConvertTo-SecureString -string $password -key (Get-content $keypath))
+$secpassword = $(ConvertTo-SecureString -string $password -securekey (Get-content $keypath))
 $credential = New-Object System.Management.Automation.PSCredential ($username, $secpassword)
 
 ### debugging bullshit ###

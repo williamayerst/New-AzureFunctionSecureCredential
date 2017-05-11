@@ -65,7 +65,7 @@ if (test-path $aeskeypath) {write-output "...key found"} else {write-output "...
 ######################################################
 write-output "Converting App Setting encrypted PW to PSCredential..."
 $secpassword = $(ConvertTo-SecureString -string $(Decrypt-String $(get-content $aeskeypath) $env:SPUserpass) -AsPlainText -Force)
-$credential = New-Object System.Management.Automation.PSCredential ($env:SPUsername, $secpassword)
+$credential = New-Object  Microsoft.SharePoint.Client.SharePointOnlineCredentials ($env:SPUsername, $secpassword)
 
 ######################################################
 write-output "Setting SPO Context"

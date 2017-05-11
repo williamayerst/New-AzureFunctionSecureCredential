@@ -1,8 +1,8 @@
 {
-  "source" : "run.ps1",
+  "scriptFile" : "run.ps1",
   "bindings": [
     {
-      
+
       "name": "myTimer",
       "type": "timerTrigger",
       "direction": "in",

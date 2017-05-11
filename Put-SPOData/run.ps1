@@ -1,5 +1,6 @@
 ######################################################
 write-output "Creating Sub-Functions"
+# see : https://gist.github.com/ctigeek/2a56648b923d198a6e60
 ######################################################
 function Create-AesManagedObject($key, $IV) {
   $aesManaged = New-Object "System.Security.Cryptography.AesManaged"
@@ -52,52 +53,28 @@ function Decrypt-String($key, $encryptedStringWithIV) {
   [System.Text.Encoding]::UTF8.GetString($unencryptedData).Trim([char]0)
 }
 ######################################################
-
 write-output "Adding in DLL's"
 Add-Type -Path "D:\home\site\wwwroot\Put-SPOData\bin\Microsoft.SharePoint.Client.dll"
 Add-Type -Path "D:\home\site\wwwroot\Put-SPOData\bin\Microsoft.SharePoint.Client.Runtime.dll"
 
 ######################################################
-
-
-write-output "Pulling data from App Settings via Environment variables..."
-$username = $env:SPUsername
-#$password = $env:SPUserpass
-$password = "02DJrJpxGKCaVn7PiXhbKBQX0Bpd8rjTtGBJdVKlSUM="
-$url = $env:SPUrl
-$listTitle = $env:SPListTitle
-$keypath = "D:\home\site\wwwroot\Put-SPOData\PassEncryptKey.key"
-
 write-output "Setting Encryption Key Data..."
 $aeskeypath = "D:\home\site\wwwroot\Put-SPOData\AES.key"
 if (test-path $aeskeypath) {write-output "...key found"} else {write-output "...key not found" ; throw }
 
-
+######################################################
 write-output "Converting App Setting encrypted PW to PSCredential..."
-$secpassword = $(ConvertTo-SecureString -string $(Decrypt-String $(get-content $aeskeypath) $password) -AsPlainText -Force)
-$credential = New-Object System.Management.Automation.PSCredential ($username, $secpassword)
+$secpassword = $(ConvertTo-SecureString -string $(Decrypt-String $(get-content $aeskeypath) $env:SPUserpass) -AsPlainText -Force)
+$credential = New-Object System.Management.Automation.PSCredential ($env:SPUsername, $secpassword)
 
-### debugging bullshit ###
-
-write-output "@@@@ keypath $keypath"
-write-output "@@@@ username $username"
-write-output "@@@@ password $password"
-write-output "@@@@ secpassword $secpassword"
-write-output "@@@@ cred username $($credential.username)"
-### debugging bullshit ###
-
-<#
+######################################################
 write-output "Setting SPO Context"
-$context =  New-Object Microsoft.SharePoint.Client.ClientContext($Url)
-
+$context =  New-Object Microsoft.SharePoint.Client.ClientContext($env:SPUrl)
 write-output "Setting SPO Creds"
 $context.Credentials = $credential
-
 write-output "Doing Magical Sharepoint Things...."
-$list = $context.Web.Lists.GetByTitle($listTitle)
+$list = $context.Web.Lists.GetByTitle($env:SPListTitle)
 $context.Load($list.RootFolder)
 $context.ExecuteQuery()
 $listUrl = $list.RootFolder.ServerRelativeUrl
-
 write-output "List Relative Url: " $listUrl
-#>

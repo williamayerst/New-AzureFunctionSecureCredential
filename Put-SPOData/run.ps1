@@ -1,26 +1,86 @@
-﻿write-output "Adding in DLL's"
+######################################################
+write-output "Creating Sub-Functions"
+######################################################
+function Create-AesManagedObject($key, $IV) {
+  $aesManaged = New-Object "System.Security.Cryptography.AesManaged"
+  $aesManaged.Mode = [System.Security.Cryptography.CipherMode]::CBC
+  $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
+  $aesManaged.BlockSize = 128
+  $aesManaged.KeySize = 256
+  if ($IV) {
+    if ($IV.getType().Name -eq "String") {
+      $aesManaged.IV = [System.Convert]::FromBase64String($IV)
+    }
+    else {
+      $aesManaged.IV = $IV
+    }
+  }
+  if ($key) {
+    if ($key.getType().Name -eq "String") {
+      $aesManaged.Key = [System.Convert]::FromBase64String($key)
+    }
+    else {
+      $aesManaged.Key = $key
+    }
+  }
+  $aesManaged
+}
+
+function Create-AesKey() {
+  $aesManaged = Create-AesManagedObject
+  $aesManaged.GenerateKey()
+  [System.Convert]::ToBase64String($aesManaged.Key)
+}
+
+function Encrypt-String($key, $unencryptedString) {
+  $bytes = [System.Text.Encoding]::UTF8.GetBytes($unencryptedString)
+  $aesManaged = Create-AesManagedObject $key
+  $encryptor = $aesManaged.CreateEncryptor()
+  $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length);
+  [byte[]] $fullData = $aesManaged.IV + $encryptedData
+  $aesManaged.Dispose()
+  [System.Convert]::ToBase64String($fullData)
+}
+
+function Decrypt-String($key, $encryptedStringWithIV) {
+  $bytes = [System.Convert]::FromBase64String($encryptedStringWithIV)
+  $IV = $bytes[0..15]
+  $aesManaged = Create-AesManagedObject $key $IV
+  $decryptor = $aesManaged.CreateDecryptor();
+  $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytes.Length - 16);
+  $aesManaged.Dispose()
+  [System.Text.Encoding]::UTF8.GetString($unencryptedData).Trim([char]0)
+}
+######################################################
+
+write-output "Adding in DLL's"
 Add-Type -Path "D:\home\site\wwwroot\Put-SPOData\bin\Microsoft.SharePoint.Client.dll"
 Add-Type -Path "D:\home\site\wwwroot\Put-SPOData\bin\Microsoft.SharePoint.Client.Runtime.dll"
+
+######################################################
+
 
 write-output "Pulling data from App Settings via Environment variables..."
 $username = $env:SPUsername
 #$password = $env:SPUserpass
-$password = "76492d1116743f0423413b16050a5345MgB8AHQAcgBGAEoATwA4AFUAVABPAFEAbABXAEUAbQBpAHcAMABGAE4AagBaAFEAPQA9AHwAMQA2ADQAMwBhADUAMQAxAGUAYgBiADUAOQAzADEAYgAyADcAMABkADMANQBmADYAMQAyADQAYQA4ADYAYQA0ADkAMwBlAGEANAAzAGYAZQA4ADMAYQAyADYAMQBlADYAZQAzADgAOQA1AGEAYgA2AGYAMABmAGMAZgA0ADgAMAA="
+$password = "02DJrJpxGKCaVn7PiXhbKBQX0Bpd8rjTtGBJdVKlSUM="
 $url = $env:SPUrl
 $listTitle = $env:SPListTitle
-
-write-output "Setting Encryption Key Data..."
-
 $keypath = "D:\home\site\wwwroot\Put-SPOData\PassEncryptKey.key"
 
+write-output "Setting Encryption Key Data..."
+$aeskeypath = "D:\home\site\wwwroot\Put-SPOData\AES.key"
+if (test-path $aeskeypath) {write-output "...key found"} else {write-output "...key not found" ; throw }
+
+
 write-output "Converting App Setting encrypted PW to PSCredential..."
-$secpassword = $(ConvertTo-SecureString -string $password -key (Get-content $keypath))
+$secpassword = $(ConvertTo-SecureString -string $(Decrypt-String $(get-content $aeskeypath) $password) -AsPlainText -Force)
 $credential = New-Object System.Management.Automation.PSCredential ($username, $secpassword)
 
 ### debugging bullshit ###
-if (test-path $keypath) {write-output "key found"} else {write-output "key not found"}
+
 write-output "@@@@ keypath $keypath"
-write-output "@@@@ username $password"
+write-output "@@@@ username $username"
 write-output "@@@@ password $password"
 write-output "@@@@ secpassword $secpassword"
 write-output "@@@@ cred username $($credential.username)"

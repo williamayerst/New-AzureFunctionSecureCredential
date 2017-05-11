@@ -26,5 +26,3 @@ if (!(test-path .\PassEncryptKey.key)) {New-EncryptKey}
 $plain = Read-host "Enter string to encrypt" 
 Get-EncryptedPassword $plain | clip
 Write-host "encrypted PW now in clipboard"
-
-# 76492d1116743f0423413b16050a5345MgB8AGoAUQBYAHoAcgB6AHQAUQBIAGYAcwBpAGQAUwBUAEgAaAAyAEIAbgBWAEEAPQA9AHwAMgBlAGEAOQA2AGEAZAA4ADcAYwA0ADgANwAzAGQAMQBiADgAMwAzADAAYwAzAGIAZgBhAGIANgBjAGIANQBmAGUAMgBhADgAZQBiADcAMwA4ADMAMgBhADEAMwBhADgAYwBjADAANQAyAGUAMwA1ADgANABhADgAYwBjADEAMgA=

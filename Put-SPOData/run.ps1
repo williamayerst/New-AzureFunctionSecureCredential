@@ -4,7 +4,8 @@ Add-Type -Path "D:\home\site\wwwroot\Put-SPOData\bin\Microsoft.SharePoint.Client
 
 write-output "Pulling data from App Settings via Environment variables..."
 $username = $env:SPUsername
-$password = $env:SPUserpass
+#$password = $env:SPUserpass
+$password = "76492d1116743f0423413b16050a5345MgB8AHQAcgBGAEoATwA4AFUAVABPAFEAbABXAEUAbQBpAHcAMABGAE4AagBaAFEAPQA9AHwAMQA2ADQAMwBhADUAMQAxAGUAYgBiADUAOQAzADEAYgAyADcAMABkADMANQBmADYAMQAyADQAYQA4ADYAYQA0ADkAMwBlAGEANAAzAGYAZQA4ADMAYQAyADYAMQBlADYAZQAzADgAOQA1AGEAYgA2AGYAMABmAGMAZgA0ADgAMAA="
 $url = $env:SPUrl
 $listTitle = $env:SPListTitle
 

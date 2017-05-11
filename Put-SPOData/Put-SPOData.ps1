@@ -4,12 +4,14 @@ $password = $env:SPUserpass
 write-host "username is: $username"
 write-host "encrypted pw is $password"
 
-write-host "Setting Encryption Key Data..."
-$keypath = "D:\home\site\wwwroot\PassEncryptKey.key"
+#write-host "Setting Encryption Key Data..."
+#$keypath = "D:\home\site\wwwroot\Put-SPOData\PassEncryptKey.key"
 
-write-host "Converting App Setting encrypted PW to PSCredential..."
-$secpassword = $password | ConvertTo-SecureString -key (Get-content $keypath)
-$credential = New-Object System.Management.Automation.PSCredential ($username, $secpassword)
+#test-path $keypath
 
-
-write-host "Got my credential for $($credential.username)!"
+#write-host "Converting App Setting encrypted PW to PSCredential..."
+#$secpassword = $password | ConvertTo-SecureString -key (Get-content $keypath)
+#$credential = New-Object System.Management.Automation.PSCredential ($username, $secpassword)
+#
+#
+#write-host "Got my credential for $($credential.username)!"
